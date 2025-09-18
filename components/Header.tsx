@@ -252,11 +252,11 @@ const Header: React.FC<HeaderProps> = ({
                  <select 
                     value={selectedSearchCategory}
                     onChange={(e) => setSelectedSearchCategory(e.target.value)}
-                    className="h-12 w-32 pl-4 bg-orange-400 hover:bg-orange-500 border-r border-orange-600 text-base font-medium text-white rounded-l-md focus:outline-none"
+                    className="h-12 w-36 px-2 text-center bg-orange-400 hover:bg-orange-500 border-r border-orange-600 text-base font-medium text-white rounded-l-md focus:outline-none"
                     aria-label="Select a category to search in"
                   >
-                    <option value="all" style={{ backgroundColor: 'white', color: 'black' }}>All</option>
-                    {categories.map(c => <option key={c.id} value={c.id} style={{ backgroundColor: 'white', color: 'black' }}>{c.name}</option>)}
+                    <option value="all" style={{ backgroundColor: 'white', color: 'black', textAlign: 'left' }}>All</option>
+                    {categories.map(c => <option key={c.id} value={c.id} style={{ backgroundColor: 'white', color: 'black', textAlign: 'left' }}>{c.name}</option>)}
                   </select>
                   <div className="relative flex-grow">
                       <input type="search" value={searchQuery} onChange={handleSearchChange} onFocus={() => setShowSuggestions(suggestions.length > 0)} placeholder="Search BWS Mart"
