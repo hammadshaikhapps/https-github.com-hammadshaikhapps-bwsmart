@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { Product, Category, Page, PageContext } from '../types';
 import ProductCard from '../components/ProductCard';
@@ -90,19 +91,33 @@ const HomePage: React.FC<HomePageProps> = ({ products, categories, navigateTo, w
   const [numBestsellersToShow, setNumBestsellersToShow] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
 
+  const featuredProductPool = useMemo(() => products.slice(0, 20), [products]);
+  
+  const bestSellerPool = useMemo(() => {
+    return [...products]
+      .sort((a, b) => b.reviewCount - a.reviewCount)
+      .slice(0, 20);
+  }, [products]);
+
   const handleScroll = useCallback(() => {
-    if (isLoading) return;
-    // Check if user is near the bottom of the page
+    const allFeaturedShown = numFeaturedToShow >= featuredProductPool.length;
+    const allBestsellersShown = numBestsellersToShow >= bestSellerPool.length;
+
+    if (isLoading || (allFeaturedShown && allBestsellersShown)) return;
+
     if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 200) {
         setIsLoading(true);
-        // Using setTimeout to simulate a network request and prevent rapid firing
         setTimeout(() => {
-            setNumFeaturedToShow(prev => prev + 5);
-            setNumBestsellersToShow(prev => prev + 5);
+            if (!allFeaturedShown) {
+              setNumFeaturedToShow(prev => Math.min(prev + 5, featuredProductPool.length));
+            }
+            if (!allBestsellersShown) {
+              setNumBestsellersToShow(prev => Math.min(prev + 5, bestSellerPool.length));
+            }
             setIsLoading(false);
         }, 400); 
     }
-  }, [isLoading]);
+  }, [isLoading, numFeaturedToShow, numBestsellersToShow, featuredProductPool.length, bestSellerPool.length]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -116,30 +131,12 @@ const HomePage: React.FC<HomePageProps> = ({ products, categories, navigateTo, w
     return () => clearTimeout(timer);
   }, [currentSlide]);
   
-  const featuredProductPool = useMemo(() => products.slice(0, 16), [products]);
-  
-  const bestSellerPool = useMemo(() => {
-    return [...products]
-      .sort((a, b) => b.reviewCount - a.reviewCount)
-      .slice(0, 16);
-  }, [products]);
-
   const displayedFeaturedProducts = useMemo(() => {
-    if (featuredProductPool.length === 0) return [];
-    const items = [];
-    for (let i = 0; i < numFeaturedToShow; i++) {
-        items.push(featuredProductPool[i % featuredProductPool.length]);
-    }
-    return items;
+    return featuredProductPool.slice(0, numFeaturedToShow);
   }, [numFeaturedToShow, featuredProductPool]);
   
   const displayedBestsellers = useMemo(() => {
-    if (bestSellerPool.length === 0) return [];
-    const items = [];
-    for (let i = 0; i < numBestsellersToShow; i++) {
-        items.push(bestSellerPool[i % bestSellerPool.length]);
-    }
-    return items;
+    return bestSellerPool.slice(0, numBestsellersToShow);
   }, [numBestsellersToShow, bestSellerPool]);
 
   const activeSlide = slides[currentSlide];
@@ -212,8 +209,8 @@ const HomePage: React.FC<HomePageProps> = ({ products, categories, navigateTo, w
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {displayedFeaturedProducts.map((product, index) => (
-              <ProductCard key={`${product.id}-${index}`} product={product} navigateTo={navigateTo} wishlist={wishlist} handleToggleWishlist={handleToggleWishlist} />
+            {displayedFeaturedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} navigateTo={navigateTo} wishlist={wishlist} handleToggleWishlist={handleToggleWishlist} />
             ))}
           </div>
         </div>
@@ -223,8 +220,8 @@ const HomePage: React.FC<HomePageProps> = ({ products, categories, navigateTo, w
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Best Sellers</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {displayedBestsellers.map((product, index) => (
-              <ProductCard key={`${product.id}-${index}`} product={product} navigateTo={navigateTo} wishlist={wishlist} handleToggleWishlist={handleToggleWishlist} />
+            {displayedBestsellers.map((product) => (
+              <ProductCard key={product.id} product={product} navigateTo={navigateTo} wishlist={wishlist} handleToggleWishlist={handleToggleWishlist} />
             ))}
           </div>
         </div>

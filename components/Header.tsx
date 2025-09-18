@@ -25,6 +25,30 @@ const Header: React.FC<HeaderProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const [location, setLocation] = useState('Detecting...');
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // In a real app, you would use a reverse geocoding service.
+          // For this simulation, we'll return a detailed mock location.
+          // Example: 37.3349, -122.0090 (Apple Park)
+          if (position.coords.latitude.toFixed(2) === '37.33' && position.coords.longitude.toFixed(2) === '-122.01') {
+             setLocation('Apple Park, Cupertino');
+          } else {
+             setLocation('Downtown, Dubai, AE'); // A generic fallback
+          }
+        },
+        () => {
+          setLocation('Downtown, Dubai, AE'); // Default on error/denial
+        },
+        { timeout: 5000 }
+      );
+    } else {
+      setLocation('Downtown, Dubai, AE'); // Default if not supported
+    }
+  }, []);
   
   const NavLink: React.FC<{children: React.ReactNode, onClick: () => void}> = ({ children, onClick }) => (
     <a 
@@ -181,8 +205,8 @@ const Header: React.FC<HeaderProps> = ({
                  <div className="hidden md:flex items-center p-2 hover:outline outline-1 outline-white rounded-sm cursor-pointer">
                     {ICONS.location}
                     <div className="ml-2 text-sm">
-                        <span className="text-gray-300">Detected Location: </span>
-                        <span className="font-bold">Dubai</span>
+                        <span className="text-gray-300">Your Location: </span>
+                        <span className="font-bold">{location}</span>
                     </div>
                  </div>
             </div>
@@ -228,11 +252,11 @@ const Header: React.FC<HeaderProps> = ({
                  <select 
                     value={selectedSearchCategory}
                     onChange={(e) => setSelectedSearchCategory(e.target.value)}
-                    className="h-12 w-48 bg-gray-200 hover:bg-gray-300 border-r border-gray-400 text-xl text-black rounded-l-md focus:outline-none text-center"
+                    className="h-12 w-32 pl-4 bg-orange-400 hover:bg-orange-500 border-r border-orange-600 text-base font-medium text-white rounded-l-md focus:outline-none"
                     aria-label="Select a category to search in"
                   >
-                    <option value="all">All</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    <option value="all" style={{ backgroundColor: 'white', color: 'black' }}>All</option>
+                    {categories.map(c => <option key={c.id} value={c.id} style={{ backgroundColor: 'white', color: 'black' }}>{c.name}</option>)}
                   </select>
                   <div className="relative flex-grow">
                       <input type="search" value={searchQuery} onChange={handleSearchChange} onFocus={() => setShowSuggestions(suggestions.length > 0)} placeholder="Search BWS Mart"
